@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>صفحة الأدمن</title>
+
+  <!-- Firebase CDN -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    body { font-family: Arial; text-align: center; margin-top: 50px; }
+    button { padding: 12px 25px; font-size: 16px; margin-top: 15px; cursor: pointer; }
+    input { width: 90%; padding: 10px; font-size: 14px; margin-top: 10px; }
+    #adminPanel { display: none; margin-top: 20px; }
+    #error { color: red; margin-top: 15px; }
+  </style>
+</head>
+<body>
+
+  <h2>تسجيل دخول الأدمن</h2>
+
+  <div id="loginForm">
+    <input type="text" id="username" placeholder="اسم المستخدم"><br>
+    <input type="password" id="password" placeholder="كلمة المرور"><br>
+    <button id="loginBtn">دخول</button>
+    <div id="error"></div>
+  </div>
+
+  <div id="adminPanel">
+    <input id="linkInput" placeholder="رابط الاختبار" /><br>
+    <button id="toggleTestBtn">تحميل حالة الاختبار...</button><br>
+    <button id="toggleAttendanceBtn">تحميل حالة الحضور...</button>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDoXcSdXC_9auQL-K9ilc5zVyKq471mFxU",
+      authDomain: "student-test-app-206e0.firebaseapp.com",
+      projectId: "student-test-app-206e0",
+      storageBucket: "student-test-app-206e0.firebasestorage.app",
+      messagingSenderId: "730037944170",
+      appId: "1:730037944170:web:d0aedc7821a993ab766f13",
+      measurementId: "G-89G3ERD4TP"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const loginForm = document.getElementById("loginForm");
+    const adminPanel = document.getElementById("adminPanel");
+    const loginBtn = document.getElementById("loginBtn");
+    const errorDiv = document.getElementById("error");
+
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+
+    const toggleTestBtn = document.getElementById("toggleTestBtn");
+    const toggleAttendanceBtn = document.getElementById("toggleAttendanceBtn");
+    const linkInput = document.getElementById("linkInput");
+
+    const docRef = db.collection("controls").doc("azeldeen");
+    let currentTestState = false;
+    let currentAttendanceState = false;
+
+    // ---- تسجيل دخول الأدمن ----
+    loginBtn.onclick = () => {
+      docRef.get().then((doc) => {
+        if (!doc.exists) return;
+        const data = doc.data();
+        const user = usernameInput.value.trim();
+        const pass = passwordInput.value.trim();
+
+        if (user === data.adminUser && pass === data.adminPass) {
+          // بيانات صحيحة
+          loginForm.style.display = "none";
+          adminPanel.style.display = "block";
+
+          // تحميل الحالة الحالية للاختبار والحضور
+          currentTestState = data.testEnabled;
+          currentAttendanceState = data.attendanceEnabled;
+          linkInput.value = data.testLink || "";
+
+          toggleTestBtn.innerText = currentTestState ? "إيقاف الاختبار" : "تفعيل الاختبار";
+          toggleAttendanceBtn.innerText = currentAttendanceState ? "إيقاف الحضور" : "تفعيل الحضور";
+
+        } else {
+          errorDiv.innerText = "اسم المستخدم أو كلمة المرور غير صحيحة!";
+        }
+      });
+    };
+
+    // ---- زر التحكم بالاختبار ----
+    toggleTestBtn.onclick = () => {
+      docRef.update({
+        testEnabled: !currentTestState,
+        testLink: linkInput.value
+      });
+    };
+
+    // ---- زر التحكم بالحضور ----
+    toggleAttendanceBtn.onclick = () => {
+      docRef.update({
+        attendanceEnabled: !currentAttendanceState
+      });
+    };
+
+    // ---- تحديث تلقائي للأزرار عند أي تغيير ----
+    docRef.onSnapshot((doc) => {
+      if (!doc.exists) return;
+      const data = doc.data();
+
+      currentTestState = data.testEnabled;
+      currentAttendanceState = data.attendanceEnabled;
+
+      linkInput.value = data.testLink || "";
+      toggleTestBtn.innerText = currentTestState ? "إيقاف الاختبار" : "تفعيل الاختبار";
+      toggleAttendanceBtn.innerText = currentAttendanceState ? "إيقاف الحضور" : "تفعيل الحضور";
+    });
+  </script>
+
+</body>
+</html>

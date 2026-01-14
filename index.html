@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>صفحة الطالب</title>
+
+  <!-- Firebase CDN -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background-color: #2e2e2e;
+      color: white;
+    }
+
+    .container {
+      width: 100%;
+      display: none; /* محتوى الصفحة مخفي حتى تسجيل الدخول */
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      margin: 10px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #msg {
+      margin-top: 20px;
+      color: red;
+      font-size: 16px;
+    }
+
+    #attendanceMsg {
+      margin-top: 10px;
+      font-size: 16px;
+    }
+
+    #totalAttendance {
+      margin-top: 15px;
+      font-size: 18px;
+      color: #00ffcc;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container" id="content">
+    <h2>مرحبًا بالطالب</h2>
+
+    <button id="testBtn" disabled>فتح الاختبار</button>
+    <div id="msg">الاختبار غير متاح حاليًا</div>
+
+    <hr style="width:50%; margin:20px auto;">
+
+    <button id="attendanceBtn" disabled>تسجيل الحضور</button>
+    <div id="attendanceMsg"></div>
+    <div id="totalAttendance"></div>
+  </div>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDoXcSdXC_9auQL-K9ilc5zVyKq471mFxU",
+      authDomain: "student-test-app-206e0.firebaseapp.com",
+      projectId: "student-test-app-206e0",
+      storageBucket: "student-test-app-206e0.firebasestorage.app",
+      messagingSenderId: "730037944170",
+      appId: "1:730037944170:web:d0aedc7821a993ab766f13",
+      measurementId: "G-89G3ERD4TP"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const contentDiv = document.getElementById("content");
+    const testBtn = document.getElementById("testBtn");
+    const msg = document.getElementById("msg");
+    const attendanceBtn = document.getElementById("attendanceBtn");
+    const attendanceMsg = document.getElementById("attendanceMsg");
+    const totalAttendanceDiv = document.getElementById("totalAttendance");
+
+    function login() {
+      let studentCode = prompt("أدخل رقم الكود الخاص بك:").trim();
+      let studentEmail = prompt("أدخل بريدك الإلكتروني:").trim().toLowerCase();
+
+      if (!studentCode || !studentEmail) {
+        if (confirm("يرجى إدخال الكود والبريد الإلكتروني.\nهل تريد إعادة المحاولة؟")) {
+          login();
+        }
+        return;
+      }
+
+      db.collection("students").doc(studentCode).get().then((doc) => {
+        if (doc.exists) {
+          const storedEmail = doc.data().email.toLowerCase();
+          if (storedEmail === studentEmail) {
+            // بيانات صحيحة → إظهار الصفحة
+            contentDiv.style.display = "block";
+
+            const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+            const attendanceRef = db.collection("attendance").doc(studentCode);
+
+            // ---- زر الحضور مع منع التكرار ومجموع الحضور ----
+            attendanceRef.get().then((doc) => {
+              const total = doc.exists ? (doc.data().totalAttendance || 0) : 0;
+              totalAttendanceDiv.innerText = "عدد مرات حضورك: " + total;
+            });
+
+            attendanceBtn.onclick = () => {
+              attendanceRef.get().then((doc) => {
+                let total = doc.exists ? (doc.data().totalAttendance || 0) : 0;
+                const lastAttendance = doc.exists ? doc.data().lastAttendance : null;
+
+                if (lastAttendance === today) {
+                  attendanceMsg.innerText = "تم تسجيل حضورك اليوم بالفعل";
+                  attendanceMsg.style.color = "red";
+                } else {
+                  const newTotal = total + 1;
+                  attendanceRef.set({
+                    lastAttendance: today,
+                    email: studentEmail,
+                    totalAttendance: newTotal
+                  });
+                  attendanceMsg.innerText = "تم تسجيل حضورك اليوم";
+                  attendanceMsg.style.color = "white";
+                  totalAttendanceDiv.innerText = "عدد مرات حضورك: " + newTotal;
+                }
+              }).catch(err => {
+                attendanceMsg.innerText = "حدث خطأ، حاول مرة أخرى";
+                attendanceMsg.style.color = "red";
+                console.error(err);
+              });
+            };
+
+            // ---- التحكم بالاختبار من الأدمن ----
+            const controlsRef = db.collection("controls").doc("azeldeen");
+            controlsRef.onSnapshot((doc) => {
+              if (!doc.exists) return;
+              const data = doc.data();
+
+              // زر الاختبار
+              if (data.testEnabled) {
+                testBtn.disabled = false;
+                msg.innerText = "";
+                testBtn.onclick = () => {
+                  window.open(data.testLink, "_blank");
+                };
+              } else {
+                testBtn.disabled = true;
+                msg.innerText = "الاختبار غير متاح حاليًا";
+              }
+
+              // زر الحضور
+              if (data.attendanceEnabled) {
+                attendanceBtn.disabled = false;
+              } else {
+                attendanceBtn.disabled = true;
+                attendanceMsg.innerText = "تم تعطيل تسجيل الحضور حاليًا";
+                attendanceMsg.style.color = "red";
+              }
+            });
+
+          } else {
+            if (confirm("البريد الإلكتروني غير صحيح.\nهل تريد إعادة المحاولة؟")) login();
+          }
+        } else {
+          if (confirm("رقم الكود غير موجود.\nهل تريد إعادة المحاولة؟")) login();
+        }
+      }).catch(err => {
+        alert("حدث خطأ أثناء التحقق، حاول مرة أخرى");
+        console.error(err);
+      });
+    }
+
+    // استدعاء وظيفة تسجيل الدخول عند فتح الصفحة
+    login();
+  </script>
+
+</body>
+</html>

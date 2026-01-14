@@ -1,0 +1,50 @@
+/* --- إعدادات عامة --- */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    margin: 20px;
+    padding: 0;
+}
+
+/* --- العناوين --- */
+h1 {
+    color: #333;
+    text-align: center;
+}
+
+/* --- أزرار --- */
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 30px 60px;
+    margin: 10px 0;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 32px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* --- المدخلات --- */
+input[type="text"] {
+    padding: 8px;
+    margin: 5px 0;
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* --- حالة الاختبار --- */
+#statusText, #message {
+    font-weight: bold;
+    color: #d9534f; /* اللون الأحمر للنص */
+    margin-left: 10px;
+}
+
+/* --- تمكين الزر عندما يكون مفعل --- */
+input[type="checkbox"]:checked + #statusText {
+    color: green;
+}
