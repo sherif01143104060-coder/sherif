@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-  <!-- Firebase SDKs (compat mode) -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
@@ -24,9 +24,7 @@
       --dark: #0d1b2a;
       --card: #1b263b;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       font-family: 'Tajawal', 'Amiri', system-ui, sans-serif;
       background: linear-gradient(135deg, var(--dark) 0%, #0a1421 100%);
@@ -34,158 +32,36 @@
       min-height: 100vh;
       line-height: 1.7;
     }
-
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-
     header { padding: 60px 0 40px; text-align: center; }
-
-    .logo {
-      font-family: 'Amiri', serif;
-      font-size: 4.8rem;
-      font-weight: 700;
-      color: var(--gold);
-      margin-bottom: 12px;
-      letter-spacing: 2px;
-    }
-
-    .manager {
-      font-size: 1.6rem;
-      color: var(--manager);
-      margin-bottom: 24px;
-      font-weight: 500;
-    }
-
+    .logo { font-family: 'Amiri', serif; font-size: 4.8rem; font-weight: 700; color: var(--gold); margin-bottom: 12px; letter-spacing: 2px; }
+    .manager { font-size: 1.6rem; color: var(--manager); margin-bottom: 24px; font-weight: 500; }
     .subtitle { font-size: 1.7rem; color: var(--accent); margin-bottom: 16px; }
-
     .tagline { font-size: 1.4rem; opacity: 0.9; max-width: 800px; margin: 0 auto; }
-
     .levels-section { padding: 60px 0; }
-
-    .section-title {
-      text-align: center;
-      font-size: 2.4rem;
-      margin-bottom: 50px;
-      color: var(--primary);
-      position: relative;
-    }
-
-    .section-title::after {
-      content: '';
-      width: 140px;
-      height: 4px;
-      background: var(--accent);
-      position: absolute;
-      bottom: -15px;
-      left: 50%;
-      transform: translateX(-50%);
-      border-radius: 2px;
-    }
-
-    .levels-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 30px;
-    }
-
-    .level-card {
-      background: var(--card);
-      border-radius: 16px;
-      overflow: hidden;
-      border: 1px solid rgba(44,125,160,0.3);
-      transition: all 0.4s ease;
-      cursor: pointer;
-    }
-
+    .section-title { text-align: center; font-size: 2.4rem; margin-bottom: 50px; color: var(--primary); position: relative; }
+    .section-title::after { content: ''; width: 140px; height: 4px; background: var(--accent); position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); border-radius: 2px; }
+    .levels-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+    .level-card { background: var(--card); border-radius: 16px; overflow: hidden; border: 1px solid rgba(44,125,160,0.3); transition: all 0.4s ease; cursor: pointer; }
     .level-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-
-    .level-header {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      padding: 30px 20px;
-      text-align: center;
-    }
-
-    .level-title {
-      font-family: 'Amiri', serif;
-      font-size: 2.5rem;
-      color: white;
-      margin-bottom: 10px;
-    }
-
+    .level-header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); padding: 30px 20px; text-align: center; }
+    .level-title { font-family: 'Amiri', serif; font-size: 2.5rem; color: white; margin-bottom: 10px; }
     .level-desc { font-size: 1.15rem; opacity: 0.9; }
-
-    .level-content {
-      padding: 0;
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.5s ease, padding 0.5s ease;
-    }
-
-    .level-card.active .level-content {
-      padding: 30px 24px;
-      max-height: 600px;
-    }
-
-    .features {
-      margin-bottom: 30px;
-      text-align: right;
-    }
-
-    .feature-item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 14px;
-      font-size: 1.1rem;
-    }
-
-    .feature-item::before {
-      content: '✓';
-      color: var(--accent);
-      font-weight: bold;
-      margin-left: 12px;
-      font-size: 1.4rem;
-    }
-
-    .btn {
-      display: block;
-      text-align: center;
-      padding: 16px;
-      font-size: 1.25rem;
-      font-weight: 600;
-      border-radius: 50px;
-      text-decoration: none;
-      transition: all 0.3s;
-      margin-top: 30px;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-
+    .level-content { padding: 0; max-height: 0; overflow: hidden; transition: max-height 0.5s ease, padding 0.5s ease; }
+    .level-card.active .level-content { padding: 30px 24px; max-height: 600px; }
+    .features { margin-bottom: 30px; text-align: right; }
+    .feature-item { display: flex; align-items: center; margin-bottom: 14px; font-size: 1.1rem; }
+    .feature-item::before { content: '✓'; color: var(--accent); font-weight: bold; margin-left: 12px; font-size: 1.4rem; }
+    .btn { display: block; text-align: center; padding: 16px; font-size: 1.25rem; font-weight: 600; border-radius: 50px; text-decoration: none; transition: all 0.3s; margin-top: 30px; }
+    .btn-primary { background: var(--primary); color: white; }
     .btn-primary:hover { background: var(--primary-dark); transform: translateY(-3px); }
-
-    .btn-register {
-      background: var(--accent);
-      color: var(--dark);
-      margin-top: 60px;
-      max-width: 400px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
+    .btn-register { background: var(--accent); color: var(--dark); margin-top: 60px; max-width: 400px; margin-left: auto; margin-right: auto; }
     .btn-register:hover { background: #e76f51; }
-
-    footer {
-      text-align: center;
-      padding: 80px 0 40px;
-      opacity: 0.7;
-      font-size: 0.95rem;
-    }
+    footer { text-align: center; padding: 80px 0 40px; opacity: 0.7; font-size: 0.95rem; }
   </style>
 </head>
 <body>
 
-<!-- 🔥 Firebase Config -->
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCjz28veGP4CkFLsLIm0rEoiZWFVBuDBWw",
@@ -195,30 +71,24 @@
     messagingSenderId: "920005799542",
     appId: "1:920005799542:web:60b76595f93489f54ff957"
   };
-
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
 </script>
 
 <div class="container">
-
   <header>
     <div class="logo">إقرا وارتق العالمية للقراءات والعلوم الشرعية</div>
     <div class="manager">المديرة / د. مسلمة السعيدي</div>
     <div class="subtitle">دورة متابعة وتحسين الأداء</div>
-    <p class="tagline">
-      دورة متكاملة لرفع مستوى التلاوة والتجويد والأداء القرآني بمتابعة يومية وإشراف متخصص
-    </p>
+    <p class="tagline">دورة متكاملة لرفع مستوى التلاوة والتجويد والأداء القرآني بمتابعة يومية وإشراف متخصص</p>
   </header>
 
   <section class="levels-section">
     <h2 class="section-title">المستويات الدراسية</h2>
-
     <div class="levels-grid">
-
       <!-- المستوى الأول -->
-      <div class="level-card" onclick="goToStudentLogin('level1')">
+      <div class="level-card" onclick="toggleLevel(this)">
         <div class="level-header">
           <div class="level-title">المستوى الأول</div>
           <div class="level-desc">البداية والتأسيس</div>
@@ -233,9 +103,8 @@
           </div>
         </div>
       </div>
-
       <!-- المستوى الثاني -->
-      <div class="level-card" onclick="goToStudentLogin('level2')">
+      <div class="level-card" onclick="toggleLevel(this)">
         <div class="level-header">
           <div class="level-title">المستوى الثاني</div>
           <div class="level-desc">التطوير والإتقان</div>
@@ -250,9 +119,8 @@
           </div>
         </div>
       </div>
-
       <!-- المستوى الثالث -->
-      <div class="level-card" onclick="goToStudentLogin('level3')">
+      <div class="level-card" onclick="toggleLevel(this)">
         <div class="level-header">
           <div class="level-title">المستوى الثالث</div>
           <div class="level-desc">التميز والإبداع</div>
@@ -267,9 +135,8 @@
           </div>
         </div>
       </div>
-
       <!-- المستوى الرابع -->
-      <div class="level-card" onclick="goToStudentLogin('level4')">
+      <div class="level-card" onclick="toggleLevel(this)">
         <div class="level-header">
           <div class="level-title">المستوى الرابع</div>
           <div class="level-desc">الإتقان والتخصص</div>
@@ -284,36 +151,51 @@
           </div>
         </div>
       </div>
-
     </div>
   </section>
 
-  <!-- زر تسجيل الدخول للطلاب -->
-  <div style="text-align:center; margin: 40px 0;">
+  <div style="text-align:center; margin: 60px 0;">
     <a href="student-login.html" class="btn btn-register">تسجيل جديد / تسجيل دخول</a>
-  </div>
-
-  <!-- مربع تسجيل دخول الأدمن -->
-  <div style="text-align:center; margin: 40px 0;">
-    <a href="admin-login.html" class="btn btn-primary">تسجيل دخول الأدمن</a>
   </div>
 
   <footer>
     <p>© 2026 إقرا وارتق العالمية للقراءات والعلوم الشرعية</p>
   </footer>
-
 </div>
 
 <script>
-function goToStudentLogin(level) {
-  // إعادة التوجيه مع تمرير المستوى
-  window.location.href = `student-login.html?level=${level}`;
-}
+  function toggleLevel(card) {
+    card.classList.toggle('active');
+  }
 
-// إذا أردت إبقاء خاصية فتح المميزات عند الضغط يمكن دمجها لاحقًا
-function toggleLevel(card) {
-  card.classList.toggle('active');
-}
+  // تعطيل المستويات الأعلى من مستوى الطالب
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      try {
+        const studentDoc = await db.collection('Students').doc(user.uid).get();
+        if (!studentDoc.exists) {
+          alert('لم يتم العثور على بياناتك. تواصل مع الإدارة.');
+          return;
+        }
+
+        const studentData = studentDoc.data();
+        const studentLevel = studentData.level;
+
+        const levelCards = document.querySelectorAll('.level-card');
+        levelCards.forEach((card, index) => {
+          const levelNumber = index + 1;
+          if (levelNumber > studentLevel) {
+            card.style.pointerEvents = 'none';
+            card.style.opacity = '0.5';
+          }
+        });
+      } catch (err) {
+        console.error('خطأ في جلب بيانات الطالب:', err);
+      }
+    } else {
+      window.location.href = 'student-login.html';
+    }
+  });
 </script>
 
 </body>
