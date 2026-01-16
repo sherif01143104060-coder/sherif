@@ -1,195 +1,320 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>صفحة الطالب</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>إقرا وارتق العالمية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-  <!-- Firebase CDN -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <!-- Firebase SDKs (compat mode) -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
 
   <style>
+    :root {
+      --primary: #2c7da0;
+      --primary-dark: #1a5276;
+      --accent: #f4a261;
+      --gold: #d4af37;
+      --manager: #e0c188;
+      --text: #f0f4f8;
+      --dark: #0d1b2a;
+      --card: #1b263b;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      font-family: 'Tajawal', 'Amiri', system-ui, sans-serif;
+      background: linear-gradient(135deg, var(--dark) 0%, #0a1421 100%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+    header { padding: 60px 0 40px; text-align: center; }
+
+    .logo {
+      font-family: 'Amiri', serif;
+      font-size: 4.8rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 12px;
+      letter-spacing: 2px;
+    }
+
+    .manager {
+      font-size: 1.6rem;
+      color: var(--manager);
+      margin-bottom: 24px;
+      font-weight: 500;
+    }
+
+    .subtitle { font-size: 1.7rem; color: var(--accent); margin-bottom: 16px; }
+
+    .tagline { font-size: 1.4rem; opacity: 0.9; max-width: 800px; margin: 0 auto; }
+
+    .levels-section { padding: 60px 0; }
+
+    .section-title {
       text-align: center;
-      background-color: #2e2e2e;
-      color: white;
+      font-size: 2.4rem;
+      margin-bottom: 50px;
+      color: var(--primary);
+      position: relative;
     }
 
-    .container {
-      width: 100%;
-      display: none; /* محتوى الصفحة مخفي حتى تسجيل الدخول */
+    .section-title::after {
+      content: '';
+      width: 140px;
+      height: 4px;
+      background: var(--accent);
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 2px;
     }
 
-    button {
-      padding: 15px 30px;
-      font-size: 18px;
-      margin: 10px;
+    .levels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+    }
+
+    .level-card {
+      background: var(--card);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(44,125,160,0.3);
+      transition: all 0.4s ease;
       cursor: pointer;
     }
 
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
+    .level-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+
+    .level-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      padding: 30px 20px;
+      text-align: center;
     }
 
-    #msg {
-      margin-top: 20px;
-      color: red;
-      font-size: 16px;
+    .level-title {
+      font-family: 'Amiri', serif;
+      font-size: 2.5rem;
+      color: white;
+      margin-bottom: 10px;
     }
 
-    #attendanceMsg {
-      margin-top: 10px;
-      font-size: 16px;
+    .level-desc { font-size: 1.15rem; opacity: 0.9; }
+
+    .level-content {
+      padding: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease, padding 0.5s ease;
     }
 
-    #totalAttendance {
-      margin-top: 15px;
-      font-size: 18px;
-      color: #00ffcc;
+    .level-card.active .level-content {
+      padding: 30px 24px;
+      max-height: 600px;
+    }
+
+    .features {
+      margin-bottom: 30px;
+      text-align: right;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 14px;
+      font-size: 1.1rem;
+    }
+
+    .feature-item::before {
+      content: '✓';
+      color: var(--accent);
+      font-weight: bold;
+      margin-left: 12px;
+      font-size: 1.4rem;
+    }
+
+    .btn {
+      display: block;
+      text-align: center;
+      padding: 16px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: all 0.3s;
+      margin-top: 30px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-3px); }
+
+    .btn-register {
+      background: var(--accent);
+      color: var(--dark);
+      margin-top: 60px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .btn-register:hover { background: #e76f51; }
+
+    footer {
+      text-align: center;
+      padding: 80px 0 40px;
+      opacity: 0.7;
+      font-size: 0.95rem;
     }
   </style>
 </head>
-
 <body>
 
-  <div class="container" id="content">
-    <h2>مرحبًا بالطالب</h2>
+<!-- 🔥 Firebase Config -->
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCjz28veGP4CkFLsLIm0rEoiZWFVBuDBWw",
+    authDomain: "iqrawartaqeacademy2026.firebaseapp.com",
+    projectId: "iqrawartaqeacademy2026",
+    storageBucket: "iqrawartaqeacademy2026.firebasestorage.app",
+    messagingSenderId: "920005799542",
+    appId: "1:920005799542:web:60b76595f93489f54ff957"
+  };
 
-    <button id="testBtn" disabled>فتح الاختبار</button>
-    <div id="msg">الاختبار غير متاح حاليًا</div>
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
 
-    <hr style="width:50%; margin:20px auto;">
+<div class="container">
 
-    <button id="attendanceBtn" disabled>تسجيل الحضور</button>
-    <div id="attendanceMsg"></div>
-    <div id="totalAttendance"></div>
+  <header>
+    <div class="logo">إقرا وارتق العالمية للقراءات والعلوم الشرعية</div>
+    <div class="manager">المديرة / د. مسلمة السعيدي</div>
+    <div class="subtitle">دورة متابعة وتحسين الأداء</div>
+    <p class="tagline">
+      دورة متكاملة لرفع مستوى التلاوة والتجويد والأداء القرآني بمتابعة يومية وإشراف متخصص
+    </p>
+  </header>
+
+  <section class="levels-section">
+    <h2 class="section-title">المستويات الدراسية</h2>
+
+    <div class="levels-grid">
+
+      <!-- المستوى الأول -->
+      <div class="level-card" onclick="goToStudentLogin('level1')">
+        <div class="level-header">
+          <div class="level-title">المستوى الأول</div>
+          <div class="level-desc">البداية والتأسيس</div>
+        </div>
+        <div class="level-content">
+          <div class="features">
+            <div class="feature-item">تأسيس قواعد التجويد من الصفر</div>
+            <div class="feature-item">تصحيح مخارج الحروف والنطق</div>
+            <div class="feature-item">متابعة يومية للحفظ والمراجعة</div>
+            <div class="feature-item">تمارين صوتية وتلاوة أساسية</div>
+            <div class="feature-item">إعداد الطالب للمراحل المتقدمة</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- المستوى الثاني -->
+      <div class="level-card" onclick="goToStudentLogin('level2')">
+        <div class="level-header">
+          <div class="level-title">المستوى الثاني</div>
+          <div class="level-desc">التطوير والإتقان</div>
+        </div>
+        <div class="level-content">
+          <div class="features">
+            <div class="feature-item">تحسين اللحن والأداء الصوتي</div>
+            <div class="feature-item">أحكام التجويد المتقدمة</div>
+            <div class="feature-item">مراجعة مستمرة وتصحيح الأخطاء</div>
+            <div class="feature-item">تسجيل تلاوات وتحليلها</div>
+            <div class="feature-item">بناء الثقة في التلاوة</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- المستوى الثالث -->
+      <div class="level-card" onclick="goToStudentLogin('level3')">
+        <div class="level-header">
+          <div class="level-title">المستوى الثالث</div>
+          <div class="level-desc">التميز والإبداع</div>
+        </div>
+        <div class="level-content">
+          <div class="features">
+            <div class="feature-item">تطوير الإحساس القرآني العميق</div>
+            <div class="feature-item">أساليب متقدمة في التلاوة</div>
+            <div class="feature-item">إعداد للحفظ الكامل</div>
+            <div class="feature-item">تدريب على التجويد الجماعي</div>
+            <div class="feature-item">بناء شخصية قارئ متميز</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- المستوى الرابع -->
+      <div class="level-card" onclick="goToStudentLogin('level4')">
+        <div class="level-header">
+          <div class="level-title">المستوى الرابع</div>
+          <div class="level-desc">الإتقان والتخصص</div>
+        </div>
+        <div class="level-content">
+          <div class="features">
+            <div class="feature-item">التخصص في القراءات المختلفة</div>
+            <div class="feature-item">تدريب على الإمامة والتدريس</div>
+            <div class="feature-item">تحليل التلاوات المتقدم</div>
+            <div class="feature-item">إعداد للمسابقات والاختبارات</div>
+            <div class="feature-item">تأهيل للعمل في مجال التلاوة</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- زر تسجيل الدخول للطلاب -->
+  <div style="text-align:center; margin: 40px 0;">
+    <a href="student-login.html" class="btn btn-register">تسجيل جديد / تسجيل دخول</a>
   </div>
 
-  <script>
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDoXcSdXC_9auQL-K9ilc5zVyKq471mFxU",
-      authDomain: "student-test-app-206e0.firebaseapp.com",
-      projectId: "student-test-app-206e0",
-      storageBucket: "student-test-app-206e0.firebasestorage.app",
-      messagingSenderId: "730037944170",
-      appId: "1:730037944170:web:d0aedc7821a993ab766f13",
-      measurementId: "G-89G3ERD4TP"
-    };
+  <!-- مربع تسجيل دخول الأدمن -->
+  <div style="text-align:center; margin: 40px 0;">
+    <a href="admin-login.html" class="btn btn-primary">تسجيل دخول الأدمن</a>
+  </div>
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+  <footer>
+    <p>© 2026 إقرا وارتق العالمية للقراءات والعلوم الشرعية</p>
+  </footer>
 
-    const contentDiv = document.getElementById("content");
-    const testBtn = document.getElementById("testBtn");
-    const msg = document.getElementById("msg");
-    const attendanceBtn = document.getElementById("attendanceBtn");
-    const attendanceMsg = document.getElementById("attendanceMsg");
-    const totalAttendanceDiv = document.getElementById("totalAttendance");
+</div>
 
-    function login() {
-      let studentCode = prompt("أدخل رقم الكود الخاص بك:").trim();
-      let studentEmail = prompt("أدخل بريدك الإلكتروني:").trim().toLowerCase();
+<script>
+function goToStudentLogin(level) {
+  // إعادة التوجيه مع تمرير المستوى
+  window.location.href = `student-login.html?level=${level}`;
+}
 
-      if (!studentCode || !studentEmail) {
-        if (confirm("يرجى إدخال الكود والبريد الإلكتروني.\nهل تريد إعادة المحاولة؟")) {
-          login();
-        }
-        return;
-      }
-
-      db.collection("students").doc(studentCode).get().then((doc) => {
-        if (doc.exists) {
-          const storedEmail = doc.data().email.toLowerCase();
-          if (storedEmail === studentEmail) {
-            // بيانات صحيحة → إظهار الصفحة
-            contentDiv.style.display = "block";
-
-            const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-            const attendanceRef = db.collection("attendance").doc(studentCode);
-
-            // ---- زر الحضور مع منع التكرار ومجموع الحضور ----
-            attendanceRef.get().then((doc) => {
-              const total = doc.exists ? (doc.data().totalAttendance || 0) : 0;
-              totalAttendanceDiv.innerText = "عدد مرات حضورك: " + total;
-            });
-
-            attendanceBtn.onclick = () => {
-              attendanceRef.get().then((doc) => {
-                let total = doc.exists ? (doc.data().totalAttendance || 0) : 0;
-                const lastAttendance = doc.exists ? doc.data().lastAttendance : null;
-
-                if (lastAttendance === today) {
-                  attendanceMsg.innerText = "تم تسجيل حضورك اليوم بالفعل";
-                  attendanceMsg.style.color = "red";
-                } else {
-                  const newTotal = total + 1;
-                  attendanceRef.set({
-                    lastAttendance: today,
-                    email: studentEmail,
-                    totalAttendance: newTotal
-                  });
-                  attendanceMsg.innerText = "تم تسجيل حضورك اليوم";
-                  attendanceMsg.style.color = "white";
-                  totalAttendanceDiv.innerText = "عدد مرات حضورك: " + newTotal;
-                }
-              }).catch(err => {
-                attendanceMsg.innerText = "حدث خطأ، حاول مرة أخرى";
-                attendanceMsg.style.color = "red";
-                console.error(err);
-              });
-            };
-
-            // ---- التحكم بالاختبار من الأدمن ----
-            const controlsRef = db.collection("controls").doc("azeldeen");
-            controlsRef.onSnapshot((doc) => {
-              if (!doc.exists) return;
-              const data = doc.data();
-
-              // زر الاختبار
-              if (data.testEnabled) {
-                testBtn.disabled = false;
-                msg.innerText = "";
-                testBtn.onclick = () => {
-                  window.open(data.testLink, "_blank");
-                };
-              } else {
-                testBtn.disabled = true;
-                msg.innerText = "الاختبار غير متاح حاليًا";
-              }
-
-              // زر الحضور
-              if (data.attendanceEnabled) {
-                attendanceBtn.disabled = false;
-              } else {
-                attendanceBtn.disabled = true;
-                attendanceMsg.innerText = "تم تعطيل تسجيل الحضور حاليًا";
-                attendanceMsg.style.color = "red";
-              }
-            });
-
-          } else {
-            if (confirm("البريد الإلكتروني غير صحيح.\nهل تريد إعادة المحاولة؟")) login();
-          }
-        } else {
-          if (confirm("رقم الكود غير موجود.\nهل تريد إعادة المحاولة؟")) login();
-        }
-      }).catch(err => {
-        alert("حدث خطأ أثناء التحقق، حاول مرة أخرى");
-        console.error(err);
-      });
-    }
-
-    // استدعاء وظيفة تسجيل الدخول عند فتح الصفحة
-    login();
-  </script>
+// إذا أردت إبقاء خاصية فتح المميزات عند الضغط يمكن دمجها لاحقًا
+function toggleLevel(card) {
+  card.classList.toggle('active');
+}
+</script>
 
 </body>
 </html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>لوحة الطالب - إقرا وارتق</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+
+  <style>
+    body {
+      font-family: 'Tajawal', 'Amiri', system-ui, sans-serif;
+      background: linear-gradient(135deg, #0d1b2a 0%, #0a1421 100%);
+      color: #f0f4f8;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container { max-width: 900px; margin: auto; }
+
+    header {
+      text-align: center;
+      padding: 30px 0;
+      background: #1b263b;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(44,125,160,0.3);
+    }
+
+    .welcome {
+      font-family: 'Amiri', serif;
+      font-size: 2.5rem;
+      color: #d4af37;
+    }
+
+    .info { color: #94a3b8; font-size: 1.1rem; }
+
+    .notification-box {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 30px;
+      border: 1px solid #334155;
+      font-size: 1.05rem;
+    }
+
+    .notification-box.success { border-right: 5px solid #22c55e; color: #86efac; }
+    .notification-box.danger  { border-right: 5px solid #f87171; color: #fca5a5; }
+
+    .section {
+      background: #1b263b;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(44,125,160,0.3);
+    }
+
+    .section h2 { color: #a5b4fc; }
+
+    .big-btn {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.2rem;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      margin: 12px 0;
+    }
+
+    .btn-attendance { background: #22c55e; color: #fff; }
+    .btn-zoom { background: #3b82f6; color: #fff; }
+    .btn-results { background: #f59e0b; color: #fff; }
+
+    .big-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status { text-align: center; margin-top: 10px; }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-spacing: 0 10px;
+      display: none;
+    }
+
+    td {
+      padding: 14px;
+      text-align: center;
+      background: #242444;
+    }
+
+    td:first-child {
+      background: #334155;
+      font-weight: bold;
+    }
+
+    td:last-child {
+      background: #0f172a;
+      color: #a5b4fc;
+      font-weight: bold;
+    }
+
+    .total-percentage {
+      text-align: center;
+      font-size: 1.8rem;
+      color: #d4af37;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+
+<body>
+<div class="container">
+
+  <header>
+    <div class="welcome" id="studentName">مرحباً</div>
+    <div class="info" id="studentInfo"></div>
+  </header>
+
+  <div id="notificationBox" class="notification-box"></div>
+
+  <div class="section">
+    <h2>تسجيل الحضور</h2>
+    <button id="btnAttendance" class="big-btn btn-attendance">تسجيل حضور اليوم</button>
+    <div class="status" id="attendanceStatus"></div>
+  </div>
+
+  <div class="section">
+    <h2>الحلقة</h2>
+    <button id="btnZoom" class="big-btn btn-zoom">الدخول للحلقة</button>
+    <div class="status" id="zoomStatus"></div>
+  </div>
+
+  <div class="section">
+    <h2>نتائجي</h2>
+    <button id="btnResults" class="big-btn btn-results">عرض نتائجي</button>
+    <div class="total-percentage">نسبة التقدم: 68%</div>
+
+    <table id="resultsTable">
+      <tbody id="resultsBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCjz28veGP4CkFLsLIm0rEoiZWFVBuDBWw",
+    authDomain: "iqrawartaqeacademy2026.firebaseapp.com",
+    projectId: "iqrawartaqeacademy2026"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  const userData = {
+    name: "شريف أحمد",
+    code: "1234",
+    level: 1,
+    attendanceEnabled: true,
+    zoomEnabled: false,
+    zoomLink: "https://zoom.us",
+    notification: "تم تسجيل حضورك اليوم بنجاح"
+  };
+
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = "student-login.html";
+      return;
+    }
+
+    document.getElementById("studentName").textContent = `مرحباً يا ${userData.name}`;
+    document.getElementById("studentInfo").textContent = `المستوى: ${userData.level} • الكود: ${userData.code}`;
+
+    const box = document.getElementById("notificationBox");
+    box.textContent = userData.notification;
+    box.classList.add("success");
+
+    document.getElementById("btnAttendance").disabled = !userData.attendanceEnabled;
+    document.getElementById("btnZoom").disabled = !userData.zoomEnabled;
+  });
+
+  document.getElementById("btnResults").onclick = () => {
+    const table = document.getElementById("resultsTable");
+    const body = document.getElementById("resultsBody");
+    body.innerHTML = "";
+
+    const results = [
+      { name: "الدرس الأول", score: "92%" },
+      { name: "الدرس الثاني", score: "—" },
+      { name: "التلاوة", score: "8.5 / 10" }
+    ];
+
+    results.forEach(r => {
+      body.innerHTML += `<tr><td>${r.name}</td><td>${r.score}</td></tr>`;
+    });
+
+    table.style.display = table.style.display === "table" ? "none" : "table";
+  };
+
+  document.getElementById("btnZoom").onclick = () => {
+    window.open(userData.zoomLink, "_blank");
+  };
+</script>
+
+</body>
+</html>
